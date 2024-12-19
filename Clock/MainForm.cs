@@ -15,8 +15,20 @@ namespace Clock
         public MainForm()
         {
             InitializeComponent();
-        }
+            labelTime.BackColor = Color.AliceBlue;
+            this.Location = new Point(Screen.PrimaryScreen.Bounds.Width-this.Width,50);
 
+        }
+        void SetVisibility(bool visible)
+        {
+            CBShowDate.Visible = visible;
+            cbShowWeekDay.Visible = visible;
+            btnHideControls.Visible = visible;
+            this.TransparencyKey = visible?Color.Empty:this.BackColor;
+            this.FormBorderStyle = visible ? FormBorderStyle.FixedToolWindow: FormBorderStyle.None;
+            labelTime.BackColor = Color.AliceBlue;
+           this.ShowInTaskbar = visible;
+        }
         private void timer1_Tick(object sender, EventArgs e)
         {
             labelTime.Text = DateTime.Now.ToString("hh:mm:ss tt",System.Globalization.CultureInfo.InvariantCulture);
@@ -25,33 +37,101 @@ namespace Clock
                 labelTime.Text += "\n"; 
                 labelTime.Text += DateTime.Now.ToString("yyyy.MM.dd"); 
             }
+            if(cbShowWeekDay.Checked)
+            {
+                labelTime.Text += "\n";
+                labelTime.Text += DateTime.Now.DayOfWeek;
+            }
+            notifyIcon.Text = labelTime.Text;
         }
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-
+            cmShowDate.Checked=CBShowDate.Checked;
         }
 
         private void btnHideControls_Click(object sender, EventArgs e)
         {
-            CBShowDate.Visible = false;
-            btnHideControls.Visible = false;
-            this.TransparencyKey = this.BackColor;
-            this.FormBorderStyle=FormBorderStyle.None;
-            labelTime.BackColor = Color.AliceBlue;
-            this.ShowInTaskbar = false;
+            //CBShowDate.Visible = false;
+            //btnHideControls.Visible = false;
+            //this.TransparencyKey = this.BackColor;
+            //this.FormBorderStyle=FormBorderStyle.None;
+            //labelTime.BackColor = Color.AliceBlue;
+            //this.ShowInTaskbar = false;
+            SetVisibility(false);
         }
 
         private void labelTime_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            MessageBox.Show
-                            (
-                this,
-                "Вы два раза целкнули мышью по времени, и теперь вы управляете временем"
-                , "Info",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-                );
+            //MessageBox.Show
+            //                (
+            //    this,
+            //    "Вы два раза целкнули мышью по времени, и теперь вы управляете временем"
+            //    , "Info",
+            //    MessageBoxButtons.OK,
+            //    MessageBoxIcon.Information
+            //    );
+            SetVisibility(true); 
+
+        }
+
+        private void labelTime_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
+        {
+            cmShowWeekday.Checked=cbShowWeekDay.Checked;
+        }
+
+        private void cmExit_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void cmTopmost_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void cmTopmost_CheckedChanged(object sender, EventArgs e)
+        {
+            this.TopMost = cmTopmost.Checked;
+        }
+
+        private void cmShowDate_CheckedChanged(object sender, EventArgs e)
+        {
+CBShowDate.Checked = cmShowDate.Checked;
+        }
+
+        private void cmShowWeekday_CheckedChanged(object sender, EventArgs e)
+        {
+            cbShowWeekDay.Checked = cmShowWeekday.Checked;
+        }
+
+        private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (!this.TopMost)
+            {
+                this.TopMost = true;
+                this.TopMost = false;
+            }
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void contextMenu_Opening(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void backgroundColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
