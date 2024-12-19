@@ -17,7 +17,7 @@ namespace Clock
             InitializeComponent();
             labelTime.BackColor = Color.AliceBlue;
             this.Location = new Point(Screen.PrimaryScreen.Bounds.Width-this.Width,50);
-
+            SetVisibility(false);
         }
         void SetVisibility(bool visible)
         {
@@ -58,7 +58,8 @@ namespace Clock
             //this.FormBorderStyle=FormBorderStyle.None;
             //labelTime.BackColor = Color.AliceBlue;
             //this.ShowInTaskbar = false;
-            SetVisibility(false);
+             SetVisibility(cmShowControls.Checked = false);
+           
         }
 
         private void labelTime_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -71,7 +72,7 @@ namespace Clock
             //    MessageBoxButtons.OK,
             //    MessageBoxIcon.Information
             //    );
-            SetVisibility(true); 
+            SetVisibility(cmShowControls.Checked = true); 
 
         }
 
@@ -129,9 +130,28 @@ CBShowDate.Checked = cmShowDate.Checked;
 
         }
 
-        private void backgroundColorToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SetColor(object sender, EventArgs e)
         {
+            ColorDialog dialog = new ColorDialog();
+            
+            switch ((( ToolStripMenuItem)sender).Text)
+            {
+                case "Background color": dialog.Color = labelTime.BackColor; break;
+                case "Foreground color": dialog.Color = labelTime.ForeColor; break;
+            }
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                switch((sender as ToolStripMenuItem).Text)
+                {
+                    case "Background color":labelTime.BackColor=dialog.Color; break;    
+                    case "Foreground color":labelTime.ForeColor=dialog.Color; break;    
+                }
+            }
+        }
 
+        private void cmShowControls_CheckedChanged(object sender, EventArgs e)
+        {
+SetVisibility(cmShowControls.Checked);
         }
     }
 }
