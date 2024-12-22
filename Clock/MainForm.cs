@@ -2,22 +2,29 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Clock
 {
     public partial class MainForm : Form
     {
+        // ChooseFontForm fontDialog = new ChooseFontForm();
+        nudFontSize fontDialog = null;
         public MainForm()
         {
             InitializeComponent();
             labelTime.BackColor = Color.AliceBlue;
             this.Location = new Point(Screen.PrimaryScreen.Bounds.Width-this.Width,50);
             SetVisibility(false);
+            cmShowConsole.Checked = true;   
+            fontDialog=new nudFontSize();
         }
         void SetVisibility(bool visible)
         {
@@ -83,7 +90,7 @@ namespace Clock
 
         private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
         {
-            cmShowWeekday.Checked=cbShowWeekDay.Checked;
+            cmShowComsole.Checked=cbShowWeekDay.Checked;
         }
 
         private void cmExit_Click(object sender, EventArgs e)
@@ -108,7 +115,7 @@ CBShowDate.Checked = cmShowDate.Checked;
 
         private void cmShowWeekday_CheckedChanged(object sender, EventArgs e)
         {
-            cbShowWeekDay.Checked = cmShowWeekday.Checked;
+            cbShowWeekDay.Checked = cmShowComsole.Checked;
         }
 
         private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -153,5 +160,23 @@ CBShowDate.Checked = cmShowDate.Checked;
         {
 SetVisibility(cmShowControls.Checked);
         }
+
+        private void cmChooseFont_Click(object sender, EventArgs e)
+        {
+            fontDialog.ShowDialog();
+        }
+
+        private void cmShowConsole_CheckedChanged(object sender, EventArgs e)
+        {
+            if ((sender as ToolStripMenuItem).Checked)
+                AllocConsole();
+            else
+                FreeConsole();
+        }  
+            [DllImport("kernel32.dll")]
+            public static extern bool AllocConsole();
+            [DllImport("kernel32.dll")]
+            public static extern bool FreeConsole();
+        
     }
 }
