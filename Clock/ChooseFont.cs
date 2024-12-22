@@ -12,6 +12,7 @@ namespace Clock
 {
     public partial class nudFontSize : Form
     {
+
         public nudFontSize()
         {
             InitializeComponent();

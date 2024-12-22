@@ -122,6 +122,7 @@
             this.Controls.Add(this.labelChooseFont);
             this.Controls.Add(this.numericUpDown1);
             this.Controls.Add(this.cbFonts);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "nudFontSize";
             this.Text = "ChooseFont";
