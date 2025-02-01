@@ -26,6 +26,7 @@ namespace Clock
 		private void cbUseDate_CheckedChanged(object sender, EventArgs e)
 		{
 			dtpDate.Enabled = cbUseDate.Checked;
+			clbWeekDays.Enabled = !cbUseDate.Checked;
 		}
 		void SetWeekDays(bool[] week)
 		{
@@ -55,10 +56,10 @@ namespace Clock
 				this.DialogResult = DialogResult.None;
 				MessageBox.Show
 					(
-						this, 
-						"Выберите звуковой файл", 
-						"Warning", 
-						MessageBoxButtons.OK, 
+						this,
+						"Выберите звуковой файл",
+						"Warning",
+						MessageBoxButtons.OK,
 						MessageBoxIcon.Warning
 					);
 			}

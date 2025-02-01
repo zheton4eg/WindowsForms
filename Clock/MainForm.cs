@@ -30,8 +30,10 @@ namespace Clock
 
 			cmShowConsole.Checked = true;
 			LoadSettings();
+			Console.WriteLine(new DateTime());
 			//fontDialog = new ChooseFontForm();
 			alarms = new AlarmsForm();
+			LoadAlarms();
 			Console.WriteLine(DateTime.MinValue);
 			//CompareAlarmsDEBUG();
 			axWindowsMediaPlayer.Visible = false;
@@ -91,10 +93,57 @@ namespace Clock
 			fontDialog = new ChooseFontForm(this, font_name, font_size);
 			labelTime.Font = fontDialog.Font;
 		}
+		void SaveAlarms()
+		{
+			string execution_path = Path.GetDirectoryName(Application.ExecutablePath);
+			string filename = $"{execution_path}\\..\\..\\Fonts\\Alarms.ini";
+			StreamWriter sw = new StreamWriter(filename);
+			for (int i = 0; i < alarms.LB_Alarms.Items.Count; i++)
+			{
+				sw.WriteLine((alarms.LB_Alarms.Items[i] as Alarm).ToFileString());
+			}
+			sw.Close();
+			Process.Start("notepad", filename);
+		}
+		void LoadAlarms()
+		{
+			string execution_path = Path.GetDirectoryName(Application.ExecutablePath);
+			string filename = $"{execution_path}\\..\\..\\Fonts\\Alarms.ini";
+			try
+			{
+				StreamReader sr = new StreamReader(filename);
+				while (!sr.EndOfStream)
+				{
+					string s_alarm = sr.ReadLine();
+					string[] s_alarm_parts = s_alarm.Split(',');
+					for (int i = 0; i < s_alarm_parts.Length; i++)
+						Console.Write(s_alarm_parts[i] + '\t');
+					Console.WriteLine();
+					Alarm alarm = new Alarm
+						(
+							s_alarm_parts[0] == "" ? new DateTime() : new DateTime(Convert.ToInt64(s_alarm_parts[0])),
+							new TimeSpan(Convert.ToInt64(s_alarm_parts[1])),
+							new Week(Convert.ToByte(s_alarm_parts[2])),
+							s_alarm_parts[3],
+							s_alarm_parts[4]
+						);
+					alarms.LB_Alarms.Items.Add(alarm);
+				}
+				sr.Close();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine("Alarms not found");
+			}
+		}
 		Alarm FindNextAlarm()
 		{
 			Alarm[] actualAlarms = alarms.LB_Alarms.Items.Cast<Alarm>().Where(a => a.Time > DateTime.Now.TimeOfDay).ToArray();
 			return actualAlarms.Min();
+		}
+		bool CompareDates(DateTime date1, DateTime date2)
+		{
+			return date1.Year == date2.Year && date1.Month == date2.Month && date1.Day == date2.Day;
 		}
 		void PlayAlarm()
 		{
@@ -103,7 +152,14 @@ namespace Clock
 			axWindowsMediaPlayer.Ctlcontrols.play();
 			axWindowsMediaPlayer.Visible = true;
 		}
-
+		void SetPlayerInvisible(object sender, AxWMPLib._WMPOCXEvents_PlayStateChangeEvent e)
+		{
+			if (
+				axWindowsMediaPlayer.playState == WMPLib.WMPPlayState.wmppsMediaEnded ||
+				axWindowsMediaPlayer.playState == WMPLib.WMPPlayState.wmppsStopped
+				)
+				axWindowsMediaPlayer.Visible = false;
+		}
 		private void timer_Tick(object sender, EventArgs e)
 		{
 			labelTime.Text = DateTime.Now.ToString
@@ -111,7 +167,6 @@ namespace Clock
 					"hh:mm:ss tt",
 					System.Globalization.CultureInfo.InvariantCulture
 				);
-			
 			if (cbShowDate.Checked)
 			{
 				labelTime.Text += "\n";
@@ -123,9 +178,14 @@ namespace Clock
 				labelTime.Text += DateTime.Now.DayOfWeek;
 			}
 			notifyIcon.Text = labelTime.Text;
-
 			if (
-				nextAlarm != null &&
+				(object)nextAlarm != null &&
+				(
+					nextAlarm.Date == DateTime.MinValue ? 
+					nextAlarm.Weekdays.Contains(DateTime.Now.DayOfWeek) : 
+					CompareDates(nextAlarm.Date, DateTime.Now)
+				) &&
+				//nextAlarm.Weekdays.Contains(DateTime.Now.DayOfWeek) &&
 				nextAlarm.Time.Hours == DateTime.Now.Hour &&
 				nextAlarm.Time.Minutes == DateTime.Now.Minute &&
 				nextAlarm.Time.Seconds == DateTime.Now.Second
@@ -133,14 +193,15 @@ namespace Clock
 			{
 				System.Threading.Thread.Sleep(1000);
 				PlayAlarm();
+				if (nextAlarm.Message != "")
+					MessageBox.Show(this, nextAlarm.Message, "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
 				//MessageBox.Show(this, nextAlarm.ToString(), "Alarm", MessageBoxButtons.OK, MessageBoxIcon.Information);
-				nextAlarm = null;
+				nextAlarm = FindNextAlarm();
 			}
 
 			if (alarms.LB_Alarms.Items.Count > 0) nextAlarm = FindNextAlarm(); //nextAlarm = alarms.LB_Alarms.Items.Cast<Alarm>().ToArray().Min();
-			if (nextAlarm != null) Console.WriteLine(nextAlarm);
+			if ((object)nextAlarm != null) Console.WriteLine(nextAlarm);
 		}
-
 		private void btnHideControls_Click(object sender, EventArgs e)
 		{
 			//cbShowDate.Visible = false;
@@ -152,7 +213,6 @@ namespace Clock
 
 			SetVisibility(cmShowControls.Checked = false);
 		}
-
 		private void labelTime_DoubleClick(object sender, EventArgs e)
 		{
 			//MessageBox.Show
@@ -173,37 +233,30 @@ namespace Clock
 
 			SetVisibility(cmShowControls.Checked = true);
 		}
-
 		private void cmExit_Click(object sender, EventArgs e)
 		{
 			this.Close();
 		}
-
 		private void cmTopmost_CheckedChanged(object sender, EventArgs e)
 		{
 			this.TopMost = cmTopmost.Checked;
 		}
-
 		private void cmShowDate_CheckedChanged(object sender, EventArgs e)
 		{
 			cbShowDate.Checked = cmShowDate.Checked;
 		}
-
 		private void cbShowDate_CheckedChanged(object sender, EventArgs e)
 		{
 			cmShowDate.Checked = cbShowDate.Checked;
 		}
-
 		private void cmShowWeekDay_CheckedChanged(object sender, EventArgs e)
 		{
 			cbShowWeekDay.Checked = cmShowWeekDay.Checked;
 		}
-
 		private void cbShowWeekDay_CheckedChanged(object sender, EventArgs e)
 		{
 			cmShowWeekDay.Checked = cbShowWeekDay.Checked;
 		}
-
 		private void notifyIcon_DoubleClick(object sender, EventArgs e)
 		{
 			if (!this.TopMost)
@@ -217,7 +270,6 @@ namespace Clock
 		{
 			SetVisibility(cmShowControls.Checked);
 		}
-
 		private void SetColor(object sender, EventArgs e)
 		{
 			ColorDialog dialog = new ColorDialog();
@@ -237,7 +289,6 @@ namespace Clock
 				}
 			}
 		}
-
 		private void cmChooseFont_Click(object sender, EventArgs e)
 		{
 			if (fontDialog.ShowDialog() == DialogResult.OK)
@@ -255,27 +306,24 @@ namespace Clock
 		public static extern bool AllocConsole();
 		[DllImport("kernel32.dll")]
 		public static extern bool FreeConsole();
-
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			SaveSettings();
+			SaveAlarms();
 		}
-
 		private void cmLoadOnWinStartup_CheckedChanged(object sender, EventArgs e)
 		{
 			string key_name = "ClockPV_319";
-			RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);    //true - открое ветку на запись.
+			RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);   
 			if (cmLoadOnWinStartup.Checked) rk.SetValue(key_name, Application.ExecutablePath);
 			else rk.DeleteValue(key_name, false);
 			rk.Dispose();
 		}
-
 		private void cmAlarm_Click(object sender, EventArgs e)
 		{
 			alarms.StartPosition = FormStartPosition.Manual;
 			alarms.Location = new Point(this.Location.X - alarms.Width, this.Location.Y);
 			alarms.ShowDialog();
 		}
-		
 	}
 }

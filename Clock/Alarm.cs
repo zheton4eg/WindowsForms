@@ -47,6 +47,31 @@ namespace Clock
 			info += $"{Message}\t";
 			return info;
 		}
+		public string ToFileString()
+		{
+			string info = "";
+			if (Date != DateTime.MinValue) info += $"{Date.Ticks}";
+			info += $",{Time.Ticks},";//.ToString(@"hh\:mm\:ss tt");
+																	 //info += Time;//.ToString(@"hh\:mm\:ss tt");
+			info += $"{Weekdays.ToFileString()},";
+			info += $"{Filename},";
+			info += $"{Message},";
+			return info;
+		}
+
+		public static bool operator ==(Alarm left, Alarm right)
+		{
+			return
+				left.Date == right.Date &&
+				left.Time == right.Time &&
+				left.Weekdays == right.Weekdays &&
+				left.Filename == right.Filename &&
+				left.Message == right.Message;
+		}
+		public static bool operator !=(Alarm left, Alarm right)
+		{
+			return !(left == right);
+		}
 		//public static bool operator >(Alarm left, Alarm right)
 		//{
 		//	if (left.Date != DateTime.MinValue || right.Date != DateTime.MinValue)
